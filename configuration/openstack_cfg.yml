@@ -1,0 +1,17 @@
+tags:
+   - clasic
+   - container
+
+openstack:
+  Fedora27:
+    ssh_path: /root/.ssh/some_key
+    ip: 10.8.xxx.xxx
+    username: fedora
+    passwd: some_password
+
+  #Fedora_Rawhide:
+  #  ssh_path: /home/esaka/.ssh/some_key
+  #  ip: 10.8.xxx.xxx
+  #  username: fedora
+  #  passwd: some_passwd
+

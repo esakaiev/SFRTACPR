@@ -1,0 +1,5 @@
+- git
+- ansible
+- python2-dnf
+- libselinux-python
+- standard-test-roles

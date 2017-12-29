@@ -1,0 +1,9 @@
+fedorapeople:
+  username: some_username
+  password: some_password
+  ssh_path: /root/.ssh/some_key
+  host: fedorapeople.org
+
+paths:
+  local_dir: /tmp/package_testing/fedorapeople/
+  remote_dir: /home/fedora/

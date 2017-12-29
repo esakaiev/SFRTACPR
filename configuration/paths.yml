@@ -1,0 +1,9 @@
+TESTING_DIR:              '/tmp/package_testing/upstream_first/'
+UPSTREAM_GIT_PATH:        'https://upstreamfirst.fedorainfracloud.org/'
+FEDORAPEOPLE_DIR:         '/tmp/package_testing/fedorapeople'
+ATOMIC_IMAGE_URL:         'https://ftp-stud.hs-esslingen.de/pub/Mirrors/alt.fedoraproject.org/atomic/stable/Fedora-Atomic-26-20170707.1/CloudImages/x86_64/images/Fedora-Atomic-26-20170707.1.x86_64.qcow2'
+ARTIFACTS:                '/tmp/artifacts/'
+STANDARD_INVENTORY_QCOW2: 'https://github.com/esakaiev/standard-inventory/blob/master/standard-inventory-qcow2'
+DOCKER_TEST_SUBJECT:      'docker:docker.io/library/fedora:26'
+
+
