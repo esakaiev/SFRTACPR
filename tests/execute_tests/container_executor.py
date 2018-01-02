@@ -32,16 +32,16 @@ class ContainerExecutor(BaseExecutor):
 
     @property
     def _exp_test_subj(self):
-        return "export TEST_SUBJECTS={}".format(self._paths_yml['DOCKER_TEST_SUBJECT'])
+        return "TEST_SUBJECTS={}".format(self._paths_yml['DOCKER_TEST_SUBJECT'])
 
     @property
     def module_path(self):
         return ContainerExecutor._module_path
 
     def execute(self):
-        self._execute_cmd(self._exp_ansible_inventory)
-        self._execute_cmd(self._exp_test_subj)
-        self._execute_cmd(self._gen_exec_cmd)
+        self._execute_cmd("sudo {0} {1} {2}".format(self._exp_ansible_inventory,
+                                                    self._exp_test_subj,
+                                                    self._gen_exec_cmd))
 
 
 if __name__ == "__main__":

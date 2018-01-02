@@ -34,15 +34,15 @@ class AtomicExecutor(BaseExecutor):
 
     @property
     def _exp_test_subj(self):
-        return "export TEST_SUBJECTS=$PWD/atomic.qcow2"
+        return "TEST_SUBJECTS=$PWD/atomic.qcow2"
 
     @property
     def _exp_extend_disk_size(self):
-        return "export EXTEND_DISK_SIZE=8G"
+        return "EXTEND_DISK_SIZE=8G"
 
     @property
     def _gen_exec_cmd(self):
-        return "sudo ansible-playbook -i {0} -e {1} --tags={2} {3} {4} > {5} 2>&1".format(
+        return "ansible-playbook -i {0} -e {1} --tags={2} {3} {4} > {5} 2>&1".format(
             self._standard_inventory_qcow2,
             self._artifacts,
             self._tag,
@@ -55,12 +55,12 @@ class AtomicExecutor(BaseExecutor):
         return AtomicExecutor._module_path
 
     def execute(self):
-        self._execute_cmd(self._exp_ansible_inventory)
         self._execute_cmd(self._obtain_atomic_qcow2)
-        self._execute_cmd(self._exp_test_subj)
         self._execute_cmd(self._obtain_standard_inventory_qcow2)
-        self._execute_cmd(self._exp_extend_disk_size)
-        self._execute_cmd(self._gen_exec_cmd)
+        self._execute_cmd("sudo {0} {1} {2} {3}".format(self._exp_ansible_inventory,
+                                                        self._exp_test_subj,
+                                                        self._exp_extend_disk_size,
+                                                        self._gen_exec_cmd))
 
 
 if __name__ == "__main__":

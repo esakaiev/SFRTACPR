@@ -34,7 +34,7 @@ class BaseExecutor(Base_Runner):
         if self._tag in self._openstack_cfg['tags'] and self._ssh:
             for image in self._ssh:
                 self.logger.log(self.module_path, "INFO",
-                                "Executing classic tests under {0} openstack image, cmd: {1}".format(image, cmd))
+                                "Executing {0} tests under {1} openstack image, cmd: {2}".format(self._tag, image, cmd))
                 stdin, stdout, stderr = self._ssh[image].send_ssh_command(cmd)
                 self.logger.log(self.module_path, "INFO", "{0}, {1}, {2}".format(stdin, stdout, stderr))
         else:
@@ -67,15 +67,15 @@ class BaseExecutor(Base_Runner):
 
     @property
     def _exp_ansible_inventory(self):
-        return "export ANSIBLE_INVENTORY=$(test -e inventory && echo inventory || echo /usr/share/ansible/inventory)"
+        return "ANSIBLE_INVENTORY=$(test -e inventory && echo inventory || echo /usr/share/ansible/inventory)"
 
     @property
     def _gen_exec_cmd(self):
-        return "sudo ansible-playbook -e {0} --tags={1} {2} {3} > {4} 2>&1".format(self._artifacts,
-                                                                                   self._tag,
-                                                                                   self._playbook,
-                                                                                   self._verbose,
-                                                                                   self._output_log)
+        return "ansible-playbook -e {0} --tags={1} {2} {3} > {4} 2>&1".format(self._artifacts,
+                                                                              self._tag,
+                                                                              self._playbook,
+                                                                              self._verbose,
+                                                                              self._output_log)
 
     @property
     def _ssh(self):
@@ -94,8 +94,8 @@ class BaseExecutor(Base_Runner):
         return BaseExecutor._module_path
 
     def execute(self):
-        self._execute_cmd(self._exp_ansible_inventory)
-        self._execute_cmd(self._gen_exec_cmd)
+        self._execute_cmd("sudo {0} {1}".format(self._exp_ansible_inventory,
+                                                self._gen_exec_cmd))
 
     def parse_logs(self):
         with open(self._artifacts + 'test.log') as log:
