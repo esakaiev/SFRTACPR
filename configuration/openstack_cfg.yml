@@ -3,11 +3,11 @@ tags:
    - container
 
 openstack:
-  Fedora27:
-    ssh_path: /root/.ssh/some_key
-    ip: 10.8.xxx.xxx
+  Fedora_27:
+    ssh_path: /home/esaka/.ssh/eduard_keypair1
+    ip: 10.8.246.135
     username: fedora
-    passwd: some_password
+    passwd: zaq1@WSX#EDC*_
 
   #Fedora_Rawhide:
   #  ssh_path: /home/esaka/.ssh/some_key

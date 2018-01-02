@@ -1,67 +1,43 @@
-import sys
 import shutil
 import os
 import subprocess
 
-sys.path.append("..")  # # Adds higher directory to python modules path.
-
 from logger.logger import Logger
-from helpers.ssh_tool import SSHTool
+from fedorapeople import PrepareRepoBase
 
 
-class PrepareRepositoryOnFedoraPeople(object):
+class PrepareRepositoryOnFedoraPeople(PrepareRepoBase):
     '''
         This class can be used for preparing repo on fedorapeople for PR on pagure
 
             * upstream_git_path (`String`) - path to the git repository
             * package (`String`) - package name
-            * fedorapeople_cfg (`Dictionary`) - dictionary with all data for ssh to fedorapeople
-
 
         :Example:
-            fedorapeople_cfg = {
-                'fedorapeople': {
-                    'username': r'username',
-                    'passwd': r'some_password',
-                    'ssh_path': r'/root/.ssh/some_key',
-                    'host': r'fedorapeople.org'},
-                'paths': {
-                    'local_dir': r'/tmp/package_testing/fedorapeople/',
-                    'remote_dir': r'/home/fedora/'}}
-
             upstream_git_path = 'https://upstreamfirst.fedorainfracloud.org/'
 
         Usage:
-            >>> prepare_pr =  PrepareRepositoryOnFedoraPeople(upstream_git_path, 'gdb', fedorapeople_cfg)
-            >>> prepare_repository.create_repo() # will prepare repository with new_tests branch and tests in
-                                                 #  tests folder on localhost
+            >>> prepare_pr =  PrepareRepositoryOnFedoraPeople(upstream_git_path, 'gdb')
             >>> prepare_repository.ssh_connect()
-            >>>prepare_repository.upload_localrepo_to_fedorapeople() # will upload repository on fedorapeople.org
+            >>> prepare_repository.upload_localrepo_to_fedorapeople() # will upload repository on fedorapeople.org
     '''
+    _module_path = os.path.abspath(__file__)
 
-    def __init__(self, upstream_git_path, package, fedorapeople_cfg):
+    def __init__(self, upstream_git_path, package):
+
         self._upstream_git_path = upstream_git_path
         self._package = package
-        self._fedorapeople_cfg = fedorapeople_cfg
-        self._local_dir = fedorapeople_cfg['paths']['local_dir']
-        self._remote_dir = fedorapeople_cfg['paths']['remote_dir']
+        self._local_dir = self.fedorapeople_cfg['paths']['local_dir']
+        self._remote_dir = self.fedorapeople_cfg['paths']['remote_dir']
 
         self._logger = Logger()
-        self._module_path = os.path.abspath(__file__)
-        self.ssh = None
-
-    def ssh_connect(self):
-        self.ssh = SSHTool(self._fedorapeople_cfg['fedorapeople']['host'],
-                           self._fedorapeople_cfg['fedorapeople']['username'],
-                           self._fedorapeople_cfg['fedorapeople']['passwd'],
-                           self._fedorapeople_cfg['fedorapeople']['ssh_path'])
+        PrepareRepoBase.establish_ssh()
 
     def upload_localrepo_to_fedorapeople(self):
         # remove directory on remote if exists
         cmd = "rm -rf {0}{1}/public_git/{2}".format(self._remote_dir,
                                                     self._fedorapeople_cfg['fedorapeople']['username'],
                                                     self._package + '.git')
-
         self.ssh.send_ssh_command(cmd)
         self._logger.log(self._module_path, "DEBUG",
                          "folder {0} on remote host {1}  has been removed".format(self._package + '.git',
@@ -91,6 +67,18 @@ class PrepareRepositoryOnFedoraPeople(object):
             self._logger.log(self._module_path, "DEBUG", "execute cmd: \n {0}".format(output))
         except subprocess.CalledProcessError as ex:
             self._logger.log(self._module_path, "ERROR", "Could not execute command: {0} {1}".format(str(cmd), ex))
+
+    @property
+    def module_path(self):
+        return PrepareRepositoryOnFedoraPeople._module_path
+
+    @property
+    def fedorapeople_cfg(self):
+        return PrepareRepositoryOnFedoraPeople._fedorapeople_cfg
+
+    @property
+    def ssh(self):
+        return PrepareRepositoryOnFedoraPeople._ssh_session
 
     def create_repo(self):
         # create dir if not exists for fedorapeople repos:
@@ -148,17 +136,6 @@ class PrepareRepositoryOnFedoraPeople(object):
 
 
 if __name__ == "__main__":
-    fedorapeople_cfg = {
-        'fedorapeople': {
-            'username': r'username',
-            'passwd': r'some_passwd',
-            'ssh_path': r'/root/.ssh/some_key',
-            'host': r'fedorapeople.org'},
-        'paths': {
-            'local_dir': r'/tmp/package_testing/fedorapeople/',
-            'remote_dir': r'/home/fedora/'}}
-    prepare_repository = PrepareRepositoryOnFedoraPeople('https://upstreamfirst.fedorainfracloud.org/', 'gdb',
-                                                         fedorapeople_cfg)
-    prepare_repository.ssh_connect()
+    prepare_repository = PrepareRepositoryOnFedoraPeople('https://upstreamfirst.fedorainfracloud.org/', 'gdb')
     prepare_repository.create_repo()
     prepare_repository.upload_localrepo_to_fedorapeople()

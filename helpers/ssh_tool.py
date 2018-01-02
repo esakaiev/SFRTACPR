@@ -1,6 +1,7 @@
 import paramiko
 import scp
 import os
+import pyping
 from logger.logger import Logger
 
 
@@ -8,8 +9,9 @@ class SSHTool(object):
     '''
     This class is used to work with Linux machines through SSH.
     '''
+    _module_path = os.path.abspath(__file__)
 
-    def __init__(self, host, username, password, key='/root/.ssh/id_rsa'):
+    def __init__(self, host, username, password, key=r'/root/.ssh/id_rsa'):
         '''
         :param host: the server to connect to through SSH
         :param username: the username to authenticate as
@@ -17,37 +19,60 @@ class SSHTool(object):
         :param key: path to the private key for the authentication
         '''
 
-        self.host = host
-        self.username = username
-        self.pkey = paramiko.RSAKey.from_private_key_file(key, password)
-        self.password = password
-        self.ssh = paramiko.SSHClient()
-        self.scp_client = scp.SCPClient
-        self.logger = Logger()
-        self.module_path = os.path.abspath(__file__)
+        self._host = host
+        self._username = username
+        self._pkey = paramiko.RSAKey.from_private_key_file(key, password)
+        self._password = password
+        self._ssh = paramiko.SSHClient()
+        self._scp_client = scp.SCPClient
+        self._logger = Logger()
+
+    def ping(self, server_ip):
+        '''
+          Method for pinging of openstack images
+        :return:
+          ('Boolean') True | False
+        '''
+        is_pingable = False
+        try:
+            r = pyping.ping(server_ip)
+            if r.ret_code == 0:
+                is_pingable = True
+            else:
+                self._logger.log(self.module_path, "DEBUG", "Device {} is not pingable, skipping".format(server_ip))
+
+        except Exception, exp:
+            self._logger.log(self.module_path, "WARNING",
+                             "Exception appeared during ping {0}:, {1}".format(server_ip, exp))
+
+        return is_pingable
 
     def establish_connection(self):
-        transport = self.ssh.get_transport()
-        if transport is None or not transport.is_active():
-            try:
-                self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                self.ssh.connect(self.host, pkey=self.pkey, username=self.username, password=self.password)
-                self.logger.log(self.module_path,
-                                "DEBUG",
-                                "Connection to {0} has been successfully established".format(self.host))
-            except Exception, exp:
-                self.logger.log(self.module_path,
-                                "ERROR",
-                                "Connection has not been established to host. Please check: \
-                                input parameters: host: {0}, pkey: {1}, username: {2}, password: {3}, \
-                                exception: {4}".format(self.host, self.pkey, self.username, self.password, exp))
-                return False
-        return True
+        result = True
+        if self.ping(self._host):
+            transport = self._ssh.get_transport()
+            if transport is None or not transport.is_active():
+                try:
+                    self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    self._ssh.connect(self._host, pkey=self._pkey, username=self._username, password=self._password)
+                    self._logger.log(self.module_path,
+                                     "DEBUG",
+                                     "Connection to {0} has been successfully established".format(self._host))
+                except Exception, exp:
+                    self._logger.log(self.module_path,
+                                     "ERROR",
+                                     "Connection has not been established to host. Please check: \
+                                     input parameters: host: {0}, pkey: {1}, username: {2}, password: {3}, \
+                                     exception: {4}".format(self._host, self._pkey, self._username, self._password, exp))
+                    result = False
+        else:
+            result = False
+        return result
 
     def terminate_connection(self):
-        self.logger.log(self.module_path, "DEBUG",
-                        "Connection to {0} has been closed")
-        self.ssh.close()
+        self._logger.log(self.module_path, "DEBUG",
+                         "Connection to {0} has been closed")
+        self._ssh.close()
 
     def send_ssh_command(self, ssh_command):
         '''
@@ -56,16 +81,14 @@ class SSHTool(object):
             stdin, stdout, strerr messages
         '''
         self.establish_connection()
-        stdin, stdout, stderr = self.ssh.exec_command(ssh_command)
+        stdin, stdout, stderr = self._ssh.exec_command(ssh_command)
         stdout = stdout.read()
         stderr = stderr.read()
 
         self.terminate_connection()
 
-        if stderr:
-            self.logger.log(self.module_path, "ERROR", stderr)
-
-        self.logger.log(self.module_path, "DEBUG", stdout)
+        self._logger.log(self.module_path, "DEBUG", stderr)
+        self._logger.log(self.module_path, "DEBUG", stdout)
         return stdin, stdout, stderr
 
     def upload_files(self, local_path, remote_path, put_files=True):
@@ -81,7 +104,7 @@ class SSHTool(object):
         '''
         self.establish_connection()
         try:
-            scp = self.scp_client(self.ssh.get_transport())
+            scp = self._scp_client(self._ssh.get_transport())
 
             if isinstance(local_path, str) and isinstance(remote_path, str):
                 local_path = [local_path]
@@ -91,14 +114,14 @@ class SSHTool(object):
                 for i, l_path in enumerate(local_path):
                     scp.put(l_path, remote_path[i], recursive=True)
 
-                self.logger.log(self.module_path, "DEBUG",
-                                "File {0} was successfully moved to host {1} in {2}".format(local_path, self.host,
-                                                                                            remote_path))
+                self._logger.log(self.module_path, "DEBUG",
+                                 "File {0} was successfully moved to host {1} in {2}".format(local_path, self._host,
+                                                                                             remote_path))
         except Exception, e:
-            self.logger.log(self.module_path, "DEBUG",
-                            "File {0} wasn't moved to host {1} in {2}, due to exception: {3}".format(local_path,
-                                                                                                     self.host,
-                                                                                                     remote_path, e))
+            self._logger.log(self.module_path, "DEBUG",
+                             "File {0} wasn't moved to host {1} in {2}, due to exception: {3}".format(local_path,
+                                                                                                      self._host,
+                                                                                                      remote_path, e))
         finally:
             self.terminate_connection()
 
@@ -115,7 +138,7 @@ class SSHTool(object):
         '''
         self.establish_connection()
         try:
-            scp = self.scp_client(self.ssh.get_transport())
+            scp = self._scp_client(self._ssh.get_transport())
 
             if isinstance(local_path, str) and isinstance(remote_path, str):
                 local_path = [local_path]
@@ -125,16 +148,20 @@ class SSHTool(object):
                 for i, l_path in enumerate(local_path):
                     scp.get(remote_path[i], l_path, recursive=True)
 
-                self.logger.log(self.module_path, "DEBUG",
-                                "File {0} was successfully moved from host {1} to {2}".format(remote_path, self.host,
-                                                                                              local_path))
+                self._logger.log(self.module_path, "DEBUG",
+                                 "File {0} was successfully moved from host {1} to {2}".format(remote_path, self._host,
+                                                                                               local_path))
         except Exception, e:
-            self.logger.log(self.module_path, "DEBUG",
-                            "File {0} wasn't moved to host {1} in {2}, due to exception: {3}".format(remote_path,
-                                                                                                     self.host,
-                                                                                                     local_path, e))
+            self._logger.log(self.module_path, "DEBUG",
+                             "File {0} wasn't moved to host {1} in {2}, due to exception: {3}".format(remote_path,
+                                                                                                      self._host,
+                                                                                                      local_path, e))
         finally:
             self.terminate_connection()
+
+    @property
+    def module_path(self):
+        return SSHTool._module_path
 
 
 if __name__ == "__main__":

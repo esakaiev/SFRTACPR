@@ -3,7 +3,6 @@ import yaml
 import sys
 import os
 
-sys.path.append("..")  # # Adds higher directory to python modules path.
 import logger.logger as logger
 
 
@@ -22,7 +21,6 @@ def parse_yml(cfg_path):
         except yaml.YAMLError as exc:
             module_path = os.path.abspath(__file__)
             logger.log(module_path, "ERROR", exc)
-            pass
 
     return data
 

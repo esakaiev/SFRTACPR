@@ -3,27 +3,17 @@
 import os
 import subprocess
 import shutil
-from preparations import PrepareBase
+
+from . import PrepareBase
 
 
 class PrepareLocal(PrepareBase):
     '''
         This class is used for preparing environment on localhost for executing tests
-
-        :Input arguments:
-
-        * testing_dir (`String`) - path to the directory, where should be located folders with tests for packages
-        * upstream_git_path ('String') - path to the git repository
-
-        :Example:
-
-
-        testing_dir = '/tmp/package_testing/upstream_first/'
-        upstream_git_path = 'https://upstreamfirst.fedorainfracloud.org/'
     '''
 
-    def __init__(self, testing_dir, upstream_git_path):
-        super(PrepareLocal, self).__init__(testing_dir, upstream_git_path)
+    def __init__(self):
+        super(PrepareLocal, self).__init__()
         self.module_path = os.path.abspath(__file__)
 
     def _create_dir(self, dir_path):

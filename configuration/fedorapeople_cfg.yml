@@ -1,6 +1,6 @@
 fedorapeople:
-  username: some_username
-  password: some_password
+  username: username
+  passwd: some_passwd
   ssh_path: /root/.ssh/some_key
   host: fedorapeople.org
 
