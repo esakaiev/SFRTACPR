@@ -11,10 +11,10 @@ class PrepareLocal(PrepareBase):
     '''
         This class is used for preparing environment on localhost for executing tests
     '''
+    _module_path = os.path.abspath(__file__)
 
     def __init__(self):
         super(PrepareLocal, self).__init__()
-        self.module_path = os.path.abspath(__file__)
 
     def _create_dir(self, dir_path):
         if not os.path.isdir(dir_path):
@@ -33,3 +33,7 @@ class PrepareLocal(PrepareBase):
             self.logger.log(self.module_path, "DEBUG", "execute cmd: {}".format(output))
         except subprocess.CalledProcessError as ex:
             self.logger.log(self.module_path, "ERROR", "Could not execute command: {0} {1}".format(str(cmd), ex))
+
+    @property
+    def module_path(self):
+        return PrepareLocal._module_path

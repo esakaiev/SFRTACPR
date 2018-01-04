@@ -2,7 +2,6 @@ import subprocess
 import os
 
 from tests import Base_Runner
-from logger.logger import Logger
 
 
 class BaseExecutor(Base_Runner):
@@ -21,13 +20,13 @@ class BaseExecutor(Base_Runner):
     _module_path = os.path.abspath(__file__)
 
     def __init__(self, path, playbook='tests.yml'):
+        self._path = path
         self._tag = 'all'
         self._artifacts = path + 'artifacts/'
         self._playbook = path + playbook
         self._verbose = ''
-        self._output_log = 'output.log'
-        self.logger = Logger()
-        Base_Runner.establish_ssh()
+        self._output_log = path + 'output.log'
+        self._logger = BaseExecutor._logger
 
     def _execute_cmd(self, cmd):
         stdout = None
@@ -70,6 +69,10 @@ class BaseExecutor(Base_Runner):
         return "ANSIBLE_INVENTORY=$(test -e inventory && echo inventory || echo /usr/share/ansible/inventory)"
 
     @property
+    def _exp_test_subj(self):
+        return "TEST_SUBJECTS=\"\""
+
+    @property
     def _gen_exec_cmd(self):
         return "ansible-playbook -e {0} --tags={1} {2} {3} > {4} 2>&1".format(self._artifacts,
                                                                               self._tag,
@@ -94,29 +97,16 @@ class BaseExecutor(Base_Runner):
         return BaseExecutor._module_path
 
     def execute(self):
-        self._execute_cmd("sudo {0} {1}".format(self._exp_ansible_inventory,
-                                                self._gen_exec_cmd))
+        #self._execute_cmd("sudo chmod 777 {0}".format(self._path))
+        self._execute_cmd("sudo rm -rf {0}".format(self._artifacts))
+        self._execute_cmd("sudo rm {0}".format(self._output_log))
+        self._execute_cmd("sudo {0} {1} {2}".format(self._exp_ansible_inventory,
+                                                    self._exp_test_subj,
+                                                    self._gen_exec_cmd))
 
     def parse_logs(self):
-        with open(self._artifacts + 'test.log') as log:
-            self.test_log = log.readlines()
-
-        for test_status in self.test_log:
-            self.logger.log(self.module_path, "INFO", "Test status: {0}".format(test_status))
-
-        with open(self._output_log) as log:
-            self.output = log.readlines()
-
-        self.logger.log(self.module_path, "INFO", "Output: {0}".format(self.output[-2]))
-
-    def parse_logs_from_server(self, ssh, image):
-        self.logger.log(self.module_path, "INFO",
-                        "image: {0}, command: cat {1}".format(image, self._artifacts + 'test.log'))
-        stdin, stdout, stderr = ssh[image].send_ssh_command("cat {0}".format(self._artifacts + 'test.log'))
-
-        self.logger.log(self.module_path, "INFO",
-                        "image: {0}, command: tail {1}".format(image, self._output_log))
-        stdin, stdout, stderr = ssh[image].send_ssh_command("tail {0}".format(self._output_log))
+        self._execute_cmd("sudo cat {0}".format(self._artifacts + 'test.log'))
+        self._execute_cmd("sudo tail {0}".format(self._output_log))
 
 
 if __name__ == '__main__':

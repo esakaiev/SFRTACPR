@@ -1,5 +1,3 @@
-from logger.logger import Logger
-
 from tests import Base_Runner
 
 
@@ -8,10 +6,6 @@ class PrepareBase(Base_Runner):
         This is base abstract class for preparing environment functionality
     '''
 
-    def __init__(self):
-        self.logger = Logger()
-        Base_Runner.establish_ssh()
-
     def install_dependencies(self):
         '''
            This method is used for preparing setup for running the tests from upstreamfirst
@@ -19,7 +13,7 @@ class PrepareBase(Base_Runner):
 
         for package in self.dependency:
             # Make sure the dependency is installed:
-            cmd = "sudo dnf install {}".format(package)
+            cmd = "sudo dnf -y install {}".format(package)
             self.execute_cmd(cmd)
 
     def _create_dir(self, dir_path):

@@ -78,6 +78,8 @@ class Model(object):
         for prepare in self._prepare_systems:
             prepare.install_dependencies()
 
+        self._prepare_systems[1].move_rhts_modules()
+
     def download_tests(self):
         # 2. download tests
         for package in self._package_list:
@@ -99,6 +101,7 @@ class Model(object):
                     executor = self._executor[tag](self._paths_cfg['TESTING_DIR'] + package[0] + '/')
                     executor.execute()
                     executor.parse_logs()
+
     @property
     def module_path(self):
         return Model._module_path
@@ -111,6 +114,6 @@ if __name__ == "__main__":
         verbose = sys.argv[1]
 
     model = Model(verbose)
-    model.prepare_environment()
-    model.download_tests()
+    #model.prepare_environment()
+    #model.download_tests()
     model.execute_tests()

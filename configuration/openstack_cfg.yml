@@ -1,13 +1,12 @@
 tags:
-   - clasic
-   - container
+   - classic
 
 openstack:
-  Fedora_27:
-    ssh_path: /home/esaka/.ssh/eduard_keypair1
-    ip: 10.8.246.135
+  Fedora_Rawhide:
+    ssh_path: /home/esaka/.ssh/some_key
+    ip: 10.8.xxx.xxx
     username: fedora
-    passwd: zaq1@WSX#EDC*_
+    passwd: some_passwd
 
   #Fedora_Rawhide:
   #  ssh_path: /home/esaka/.ssh/some_key

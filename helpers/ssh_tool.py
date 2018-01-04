@@ -27,46 +27,25 @@ class SSHTool(object):
         self._scp_client = scp.SCPClient
         self._logger = Logger()
 
-    def ping(self, server_ip):
-        '''
-          Method for pinging of openstack images
-        :return:
-          ('Boolean') True | False
-        '''
-        is_pingable = False
-        try:
-            r = pyping.ping(server_ip)
-            if r.ret_code == 0:
-                is_pingable = True
-            else:
-                self._logger.log(self.module_path, "DEBUG", "Device {} is not pingable, skipping".format(server_ip))
-
-        except Exception, exp:
-            self._logger.log(self.module_path, "WARNING",
-                             "Exception appeared during ping {0}:, {1}".format(server_ip, exp))
-
-        return is_pingable
-
     def establish_connection(self):
         result = True
-        if self.ping(self._host):
-            transport = self._ssh.get_transport()
-            if transport is None or not transport.is_active():
-                try:
-                    self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                    self._ssh.connect(self._host, pkey=self._pkey, username=self._username, password=self._password)
-                    self._logger.log(self.module_path,
-                                     "DEBUG",
-                                     "Connection to {0} has been successfully established".format(self._host))
-                except Exception, exp:
-                    self._logger.log(self.module_path,
-                                     "ERROR",
-                                     "Connection has not been established to host. Please check: \
-                                     input parameters: host: {0}, pkey: {1}, username: {2}, password: {3}, \
-                                     exception: {4}".format(self._host, self._pkey, self._username, self._password, exp))
-                    result = False
-        else:
-            result = False
+
+        transport = self._ssh.get_transport()
+        if transport is None or not transport.is_active():
+            try:
+                self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                self._ssh.connect(self._host, pkey=self._pkey, username=self._username, password=self._password)
+                self._logger.log(self.module_path,
+                                 "DEBUG",
+                                 "Connection to {0} has been successfully established".format(self._host))
+            except Exception, exp:
+                self._logger.log(self.module_path,
+                                 "ERROR",
+                                 "Connection has not been established to host. Please check: \
+                                 input parameters: host: {0}, pkey: {1}, username: {2}, password: {3}, \
+                                 exception: {4}".format(self._host, self._pkey, self._username, self._password,
+                                                        exp))
+                result = False
         return result
 
     def terminate_connection(self):
@@ -91,7 +70,7 @@ class SSHTool(object):
         self._logger.log(self.module_path, "DEBUG", stdout)
         return stdin, stdout, stderr
 
-    def upload_files(self, local_path, remote_path, put_files=True):
+    def upload_files(self, local_path, remote_path):
         '''
             This method is used to copy files on remote
             :param local_path: Path to file on localhost

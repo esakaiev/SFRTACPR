@@ -22,13 +22,6 @@ class ClassicExecutor(BaseExecutor):
         super(ClassicExecutor, self).__init__(tests_path, playbook)
         self._tag = 'classic'
 
-    def parse_logs(self):
-        if not self._ssh:
-            super(ClassicExecutor, self).parse_logs()
-        else:
-            for image in self._ssh:
-                super(ClassicExecutor, self).parse_logs_from_server(self._ssh, image)
-
     @property
     def module_path(self):
         return ClassicExecutor._module_path

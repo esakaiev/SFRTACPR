@@ -17,18 +17,12 @@ class ContainerExecutor(BaseExecutor):
 
         >>>  container = ContainerExecutor("/tmp/package_testing/upstream_first/attr/")
     '''
+
     _module_path = os.path.abspath(__file__)
 
     def __init__(self, path, playbook='tests.yml'):
         super(ContainerExecutor, self).__init__(path, playbook)
         self._tag = 'container'
-
-    def parse_logs(self):
-        if not self._ssh:
-            super(ContainerExecutor, self).parse_logs()
-        else:
-            for image in self._ssh:
-                super(ContainerExecutor, self).parse_logs_from_server(self._ssh, image)
 
     @property
     def _exp_test_subj(self):
