@@ -1,6 +1,8 @@
 import shutil
 import os
 import subprocess
+import sys
+sys.path.append("..")
 
 from logger.logger import Logger
 from fedorapeople import PrepareRepoBase
@@ -136,6 +138,6 @@ class PrepareRepositoryOnFedoraPeople(PrepareRepoBase):
 
 
 if __name__ == "__main__":
-    prepare_repository = PrepareRepositoryOnFedoraPeople('https://upstreamfirst.fedorainfracloud.org/', 'gdb')
+    prepare_repository = PrepareRepositoryOnFedoraPeople('https://upstreamfirst.fedorainfracloud.org/', 'nss-softokn')
     prepare_repository.create_repo()
     prepare_repository.upload_localrepo_to_fedorapeople()

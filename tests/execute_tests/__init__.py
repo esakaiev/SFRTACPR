@@ -97,7 +97,7 @@ class BaseExecutor(Base_Runner):
         return BaseExecutor._module_path
 
     def execute(self):
-        #self._execute_cmd("sudo chmod 777 {0}".format(self._path))
+        self._execute_cmd("sudo chmod 777 {0}".format(self._path))
         self._execute_cmd("sudo rm -rf {0}".format(self._artifacts))
         self._execute_cmd("sudo rm {0}".format(self._output_log))
         self._execute_cmd("sudo {0} {1} {2}".format(self._exp_ansible_inventory,

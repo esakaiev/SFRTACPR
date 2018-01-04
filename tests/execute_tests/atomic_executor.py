@@ -25,12 +25,12 @@ class AtomicExecutor(BaseExecutor):
 
     @property
     def _obtain_atomic_qcow2(self):
-        return "curl -Lo atomic.qcow2 {0}".format(AtomicExecutor._paths_yml['ATOMIC_IMAGE_URL'])
+        return "curl -Lo atomic.qcow2 {0}".format(self._paths_yml['ATOMIC_IMAGE_URL'])
 
     @property
     def _obtain_standard_inventory_qcow2(self):
         return "curl -Lo {0} {1}".format(self._standard_inventory_qcow2,
-                                         AtomicExecutor._paths_yml['STANDARD_INVENTORY_QCOW2'])
+                                         self._paths_yml['STANDARD_INVENTORY_QCOW2'])
 
     @property
     def _exp_test_subj(self):
